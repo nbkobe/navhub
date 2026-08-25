@@ -1,383 +1,280 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NAV - 未来智能导航</title>
-    <style>
-        :root {
-            --primary: #00f3ff;
-            --secondary: #bc13fe;
-            --bg: #050510;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text: #e0e6ed;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-        }
-
-        /* 粒子画布背景 */
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
-        }
-
-        /* 头部样式 */
-        header {
-            text-align: center;
-            padding: 80px 20px 40px;
-            position: relative;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(90deg, var(--primary), #fff, var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
-            margin-bottom: 15px;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            color: #8b9bb4;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-
-        /* 搜索框 */
-        .search-container {
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 16px 24px;
-            border-radius: 50px;
-            border: 1px solid var(--primary);
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-size: 1rem;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-        }
-
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
-            border-color: #fff;
-        }
-
-        /* 主体容器 */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* 分类标题 */
-        .category-header {
-            display: flex;
-            align-items: center;
-            margin: 50px 0 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .category-icon {
-            font-size: 1.5rem;
-            margin-right: 10px;
-            filter: drop-shadow(0 0 5px var(--secondary));
-        }
-
-        .category-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* 网格布局 */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
-        }
-
-        /* 卡片样式 (毛玻璃) */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 24px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px -10px rgba(0, 243, 255, 0.2);
-        }
-
-        .card:hover::before { opacity: 1; }
-
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .tool-icon {
-            font-size: 2rem;
-            background: rgba(255,255,255,0.1);
-            width: 50px; height: 50px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 12px;
-        }
-
-        .tag {
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: rgba(188, 19, 254, 0.2);
-            color: #d98aff;
-            border: 1px solid rgba(188, 19, 254, 0.3);
-        }
-
-        .card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-
-        .card p {
-            font-size: 0.9rem;
-            color: #a0aec0;
-            line-height: 1.5;
-            flex-grow: 1;
-        }
-
-        /* 底部 */
-        footer {
-            text-align: center;
-            padding: 60px 20px;
-            color: #4a5568;
-            font-size: 0.9rem;
-        }
-
-        /* 响应式 */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI NAV HUB - 赛博粒子交互版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#030014;color:#e2e8f0;overflow-x:hidden;min-height:100vh}
+canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:auto;cursor:pointer}
+header{position:relative;z-index:1;text-align:center;padding:80px 20px 40px}
+header h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;background:linear-gradient(135deg,#00f3ff,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 40px rgba(0,243,255,0.3);letter-spacing:3px;margin-bottom:12px}
+header p{color:#64748b;font-size:1.1rem}
+.search-box{max-width:520px;margin:30px auto 0;position:relative}
+.search-box input{width:100%;padding:16px 24px;border-radius:50px;border:1px solid rgba(0,243,255,0.3);background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);color:#e2e8f0;font-size:1rem;outline:none;transition:all 0.3s}
+.search-box input:focus{border-color:#00f3ff;box-shadow:0 0 20px rgba(0,243,255,0.15)}
+.container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px}
+.section-title{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:700;color:#a78bfa;margin:50px 0 20px;padding-bottom:10px;border-bottom:1px solid rgba(167,139,250,0.15)}
+.section-title span{font-size:1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;text-decoration:none;color:inherit;transition:all 0.35s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(8px);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,243,255,0.05),rgba(167,139,250,0.05));opacity:0;transition:opacity 0.35s}
+.card:hover{transform:translateY(-6px);border-color:rgba(0,243,255,0.4);box-shadow:0 12px 40px rgba(0,243,255,0.1)}
+.card:hover::after{opacity:1}
+.card>*{position:relative;z-index:1}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.icon-box{width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.6rem}
+.tag{font-size:0.7rem;padding:3px 10px;border-radius:20px;background:rgba(167,139,250,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.25);white-space:nowrap}
+.card h3{font-size:1.1rem;margin-bottom:8px;color:#f1f5f9}
+.card p{font-size:0.85rem;color:#64748b;line-height:1.6;flex-grow:1}
+.news-card{display:flex;flex-direction:column;height:100%}
+.news-date{font-size:0.75rem;color:#94a3b8;margin-bottom:8px}
+.news-title{font-size:1rem;font-weight:600;color:#e2e8f0;margin-bottom:8px;line-height:1.4}
+.news-source{font-size:0.75rem;color:#64748b;margin-top:auto}
+footer{position:relative;z-index:1;text-align:center;padding:60px 20px;color:#334155;font-size:0.85rem;border-top:1px solid rgba(255,255,255,0.03);margin-top:60px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}header{padding:50px 15px 30px}}
+</style>
 </head>
 <body>
 
-    <!-- 粒子特效容器 -->
-    <div id="particles-js"></div>
+<canvas id="particles"></canvas>
 
-    <header>
-        <h1>AI NAV HUB</h1>
-        <p class="subtitle">探索全球顶尖人工智能工具 · 提升未来竞争力</p>
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="搜索工具名称或功能..." id="searchInput" onkeyup="filterCards()">
-        </div>
-    </header>
+<header>
+  <h1>⚡ AI NAV HUB</h1>
+  <p>全球精选 AI 工具 · 实时资讯更新</p>
+  <div class="search-box">
+    <input type="text" placeholder="🔍 搜索工具名称或功能..." id="searchInput" onkeyup="filterCards()">
+  </div>
+</header>
 
-    <div class="container">
+<div class="container">
 
-        <!-- 分类 1：AI 绘画与设计 -->
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">🎨</span>
-                <span class="category-title">AI 绘画 & 设计</span>
-            </div>
-            <div class="grid">
-                <!-- 你的链接 -->
-                <a href="https://modao.cgref.cn/s/rpe3rode05" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🖌️</div>
-                        <span class="tag">国内热榜</span>
-                    </div>
-                    <h3>墨刀 AI</h3>
-                    <p>国产原型设计神器，AI辅助快速生成UI界面与交互。</p>
-                </a>
-                
-                <!-- 补充国际工具 -->
-                <a href="https://www.midjourney.com" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🌌</div>
-                        <span class="tag">行业标杆</span>
-                    </div>
-                    <h3>Midjourney</h3>
-                    <p>全球最强AI绘画工具，通过Discord生成电影级艺术画作。</p>
-                </a>
-                 <a href="https://stability.ai" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🏞️</div>
-                        <span class="tag">开源免费</span>
-                    </div>
-                    <h3>Stable Diffusion</h3>
-                    <p>本地部署首选，可控性极强的开源AI绘画模型。</p>
-                </a>
-                 <a href="https://www.canva.com/ai-image-generator/" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🎨</div>
-                        <span class="tag">设计必备</span>
-                    </div>
-                    <h3>Canva AI</h3>
-                    <p>在线设计平台集成AI功能，一键抠图、魔法编辑。</p>
-                </a>
-            </div>
-        </div>
+  <!-- ========== AI 绘画 & 设计 ========== -->
+  <div class="section-title"><span>🎨</span>AI 绘画 & 设计</div>
+  <div class="grid">
 
-        <!-- 分类 2：AI 办公 & 提效 -->
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">💼</span>
-                <span class="category-title">AI 办公 & 提效</span>
-            </div>
-            <div class="grid">
-                <!-- 你的链接 -->
-                <a href="https://wondercv.cgref.cn/s/1oe70mmn23" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">📄</div>
-                        <span class="tag">求职必备</span>
-                    </div>
-                    <h3>WonderCV 简历</h3>
-                    <p>AI一键优化简历排版与内容，提升面试通过率。</p>
-                </a>
-                <a href="https://islide.cgref.cn/s/1zn5r9peqm" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">📊</div>
-                        <span class="tag">PPT神器</span>
-                    </div>
-                    <h3>iSlide PPT</h3>
-                    <p>海量PPT模板库，AI一键生成大纲与排版。</p>
-                </a>
-                <a href="https://aippt-plugin.cgref.cn/s/2znrl29nr7" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">⚡</div>
-                        <span class="tag">极速生成</span>
-                    </div>
-                    <h3>AI PPT 插件</h3>
-                    <p>浏览器插件，任何网页内容一键转化为演示文稿。</p>
-                </a>
-                <a href="https://cappt.cgref.cn/s/dqndyxwn2z" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">✨</div>
-                        <span class="tag">智能排版</span>
-                    </div>
-                    <h3>Cappt AI</h3>
-                    <p>专注于演示文档生成的AI工具，告别繁琐排版。</p>
-                </a>
-                <!-- 补充国际工具 -->
-                <a href="https://www.notion.so/product/ai" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">📝</div>
-                        <span class="tag">笔记首选</span>
-                    </div>
-                    <h3>Notion AI</h3>
-                    <p>最强的All-in-one工作台，AI辅助写作与整理。</p>
-                </a>
-            </div>
-        </div>
+    <a href="https://modao.cgref.cn/s/rpe3rode05" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🖌️</div><span class="tag">国内热榜</span></div>
+      <h3>墨刀 AI</h3>
+      <p>国产原型设计神器，AI 辅助快速生成 UI 界面与交互原型。</p>
+    </a>
 
-        <!-- 分类 3：AI 视频 & 创作 -->
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">🎬</span>
-                <span class="category-title">AI 视频 & 创作</span>
-            </div>
-            <div class="grid">
-                <!-- 你的链接 -->
-                <a href="https://xfzhizuo.cgref.cn/s/jgemm3gemy" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🎙️</div>
-                        <span class="tag">配音合成</span>
-                    </div>
-                    <h3>讯飞智作</h3>
-                    <p>科大讯飞出品，文字转语音、虚拟人视频制作。</p>
-                </a>
-                <!-- 补充国际工具 -->
-                <a href="https://runwayml.com/" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🎥</div>
-                        <span class="tag">视频生成</span>
-                    </div>
-                    <h3>Runway Gen-2</h3>
-                    <p>好莱坞级别的AI视频生成工具，图生视频效果惊艳。</p>
-                </a>
-                <a href="https://www.capcut.cn/" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">✂️</div>
-                        <span class="tag">剪辑神器</span>
-                    </div>
-                    <h3>剪映专业版</h3>
-                    <p>内置强大AI功能，自动字幕、智能抠像。</p>
-                </a>
-            </div>
-        </div>
+    <a href="https://www.midjourney.com" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🌌</div><span class="tag">行业标杆</span></div>
+      <h3>Midjourney</h3>
+      <p>全球最强 AI 绘画工具，通过 Discord 生成电影级艺术画作。</p>
+    </a>
 
-        <!-- 分类 4：AI 智能体 & 对话 -->
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">🤖</span>
-                <span class="category-title">AI 智能体 & 对话</span>
-            </div>
-            <div class="grid">
-                <!-- 你的链接 -->
-                <a href="https://01agent.cgref.cn/s/5ln1l9gkrw" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">🧠</div>
-                        <span class="tag">零代码</span>
-                    </div>
-                    <h3>01 Agent</h3>
-                    <p>零代码搭建专属AI智能体，打造个人知识库。</p>
-                </a>
-                <a href="https://vibeknow.cgref.cn/s/zdkj0m8e1r" target="_blank" class="card">
-                    <div class="card-top">
-                        <div class="tool-icon">📚</div>
-                        <span class="tag">企业级</span>
-                    </div>
-                    <h3>VibeKnow</h3>
-                    <p>团队知识秒变智能问答，企业内部效率引擎。</p>
-                </a>
-                <!-- 补充国际工具 -->
-                <a href="https://claude.ai/" target="_blank" class="card">
-                    <div
+    <a href="https://stability.ai" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🏞️</div><span class="tag">开源免费</span></div>
+      <h3>Stable Diffusion</h3>
+      <p>本地部署首选，可控性极强的开源 AI 绘画模型。</p>
+    </a>
+
+    <a href="https://www.canva.com/ai-image-generator/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎨</div><span class="tag">设计必备</span></div>
+      <h3>Canva AI</h3>
+      <p>在线设计平台集成 AI 功能，一键抠图、魔法编辑。</p>
+    </a>
+
+    <a href="https://openclaw.ai" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🦾</div><span class="tag">国外新锐</span></div>
+      <h3>OpenCLAW</h3>
+      <p>开源 AI 绘画工具，支持自定义模型训练与风格迁移。</p>
+    </a>
+
+    <a href="https://www.dreamstudio.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✨</div><span class="tag">创意生成</span></div>
+      <h3>DreamStudio</h3>
+      <p>Stability AI 官方平台，快速生成高质量 AI 图像。</p>
+    </a>
+
+    <a href="https://www.nightcafe.studio/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🌙</div><span class="tag">艺术风格</span></div>
+      <h3>NightCafe</h3>
+      <p>多种 AI 绘画算法，支持风格迁移与艺术创作。</p>
+    </a>
+
+    <a href="https://www.craiyon.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🖍️</div><span class="tag">免费易用</span></div>
+      <h3>Craiyon</h3>
+      <p>前身 DALL-E mini，免费在线生成趣味 AI 图像。</p>
+    </a>
+
+  </div>
+
+  <!-- ========== AI 办公 & 提效 ========== -->
+  <div class="section-title"><span>💼</span>AI 办公 & 提效</div>
+  <div class="grid">
+
+    <a href="https://wondercv.cgref.cn/s/1oe70mmn23" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">📄</div><span class="tag">求职必备</span></div>
+      <h3>WonderCV 简历</h3>
+      <p>AI 一键优化简历排版与内容，提升面试通过率。</p>
+    </a>
+
+    <a href="https://islide.cgref.cn/s/1zn5r9peqm" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">📊</div><span class="tag">PPT神器</span></div>
+      <h3>iSlide PPT</h3>
+      <p>海量 PPT 模板库，AI 一键生成大纲与精美排版。</p>
+    </a>
+
+    <a href="https://aippt-plugin.cgref.cn/s/2znrl29nr7" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">⚡</div><span class="tag">极速生成</span></div>
+      <h3>AI PPT 插件</h3>
+      <p>浏览器插件，任何网页内容一键转化为演示文稿。</p>
+    </a>
+
+    <a href="https://cappt.cgref.cn/s/dqndyxwn2z" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✨</div><span class="tag">智能排版</span></div>
+      <h3>Cappt AI</h3>
+      <p>专注于演示文档生成的 AI 工具，告别繁琐排版。</p>
+    </a>
+
+    <a href="https://www.notion.so/product/ai" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">📝</div><span class="tag">笔记首选</span></div>
+      <h3>Notion AI</h3>
+      <p>最强 All-in-one 工作台，AI 辅助写作与知识整理。</p>
+    </a>
+
+    <a href="https://www.jasper.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✍️</div><span class="tag">文案生成</span></div>
+      <h3>Jasper</h3>
+      <p>专业 AI 文案写作工具，支持多语言内容创作。</p>
+    </a>
+
+    <a href="https://www.copy.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">📄</div><span class="tag">营销文案</span></div>
+      <h3>Copy.ai</h3>
+      <p>快速生成营销文案、社交媒体内容与广告语。</p>
+    </a>
+
+    <a href="https://www.grammarly.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✅</div><span class="tag">语法检查</span></div>
+      <h3>Grammarly</h3>
+      <p>AI 语法检查与写作建议，提升英文写作质量。</p>
+    </a>
+
+    <a href="https://otter.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎙️</div><span class="tag">语音转写</span></div>
+      <h3>Otter.ai</h3>
+      <p>实时语音转文字，会议记录与访谈整理利器。</p>
+    </a>
+
+    <a href="https://www.fireflies.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🔥</div><span class="tag">会议助手</span></div>
+      <h3>Fireflies.ai</h3>
+      <p>自动记录会议内容，AI 生成会议纪要与摘要。</p>
+    </a>
+
+  </div>
+
+  <!-- ========== AI 视频 & 创作 ========== -->
+  <div class="section-title"><span>🎬</span>AI 视频 & 创作</div>
+  <div class="grid">
+
+    <a href="https://xfzhizuo.cgref.cn/s/jgemm3gemy" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎙️</div><span class="tag">配音合成</span></div>
+      <h3>讯飞智作</h3>
+      <p>科大讯飞出品，文字转语音、虚拟人视频一键制作。</p>
+    </a>
+
+    <a href="https://runwayml.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎥</div><span class="tag">视频生成</span></div>
+      <h3>Runway Gen-2</h3>
+      <p>好莱坞级别 AI 视频生成工具，图生视频效果惊艳。</p>
+    </a>
+
+    <a href="https://www.capcut.cn/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✂️</div><span class="tag">剪辑神器</span></div>
+      <h3>剪映专业版</h3>
+      <p>内置强大 AI 功能，自动字幕、智能抠像、AI配音。</p>
+    </a>
+
+    <a href="https://www.synthesia.io/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">👤</div><span class="tag">虚拟人</span></div>
+      <h3>Synthesia</h3>
+      <p>AI 虚拟人视频生成，支持多语言口型同步。</p>
+    </a>
+
+    <a href="https://www.pictory.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎞️</div><span class="tag">视频剪辑</span></div>
+      <h3>Pictory</h3>
+      <p>文本转视频，自动剪辑与字幕生成。</p>
+    </a>
+
+    <a href="https://www.invideo.io/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎬</div><span class="tag">视频制作</span></div>
+      <h3>InVideo</h3>
+      <p>在线视频编辑平台，AI 辅助快速制作专业视频。</p>
+    </a>
+
+    <a href="https://www.lumen5.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">💡</div><span class="tag">内容转视频</span></div>
+      <h3>Lumen5</h3>
+      <p>博客文章转视频，AI 自动匹配素材与音乐。</p>
+    </a>
+
+    <a href="https://www.veed.io/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✂️</div><span class="tag">在线剪辑</span></div>
+      <h3>VEED.IO</h3>
+      <p>在线视频编辑器，AI 字幕、翻译与背景移除。</p>
+    </a>
+
+  </div>
+
+  <!-- ========== AI 智能体 & 对话 ========== -->
+  <div class="section-title"><span>🤖</span>AI 智能体 & 对话</div>
+  <div class="grid">
+
+    <a href="https://01agent.cgref.cn/s/5ln1l9gkrw" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🧠</div><span class="tag">零代码</span></div>
+      <h3>01 Agent</h3>
+      <p>零代码搭建专属 AI 智能体，打造个人知识库。</p>
+    </a>
+
+    <a href="https://vibeknow.cgref.cn/s/zdkj0m8e1r" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">📚</div><span class="tag">企业级</span></div>
+      <h3>VibeKnow</h3>
+      <p>团队知识秒变智能问答，企业内部效率引擎。</p>
+    </a>
+
+    <a href="https://claude.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">💬</div><span class="tag">最强对话</span></div>
+      <h3>Claude</h3>
+      <p>Anthropic 出品，长上下文理解能力最强的大语言模型。</p>
+    </a>
+
+    <a href="https://chat.openai.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🧩</div><span class="tag">全能助手</span></div>
+      <h3>ChatGPT</h3>
+      <p>OpenAI 出品，全球用户最多的 AI 对话与创作助手。</p>
+    </a>
+
+    <a href="https://gemini.google.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">✨</div><span class="tag">谷歌出品</span></div>
+      <h3>Gemini</h3>
+      <p>Google 最新大模型，多模态理解与生成能力强。</p>
+    </a>
+
+    <a href="https://www.perplexity.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🔍</div><span class="tag">AI搜索</span></div>
+      <h3>Perplexity</h3>
+      <p>AI 驱动的搜索引擎，提供精准答案与来源引用。</p>
+    </a>
+
+    <a href="https://poe.com/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">💬</div><span class="tag">多模型</span></div>
+      <h3>Poe</h3>
+      <p>Quora 出品，集成多个 AI 模型的对话平台。</p>
+    </a>
+
+    <a href="https://www.character.ai/" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🎭</div><span class="tag">角色扮演</span></div>
+      <h3>Character.AI</h3>
+      <p>创建与 AI 角色对话，支持自定义人物设定。</p>
+    </a>
+
+    <a href="https://pi.ai/talk" target="_blank" class="card">
+      <div class="card-top"><div class="icon-box">🤗</div><span class="tag">情感陪伴</span></
