@@ -1,133 +1,383 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NavHub - AI工具导航站</title>
+    <title>AI NAV - 未来智能导航</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, 'Segoe UI', sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
-            min-height: 100vh;
+        :root {
+            --primary: #00f3ff;
+            --secondary: #bc13fe;
+            --bg: #050510;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text: #e0e6ed;
         }
-        header { text-align: center; padding: 60px 20px 30px; }
-        header h1 {
-            font-size: 2.8rem;
-            background: linear-gradient(135deg, #38bdf8, #a78bfa);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* 粒子画布背景 */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+        }
+
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 80px 20px 40px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), #fff, var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
         }
-        header p { color: #64748b; font-size: 1.1rem; }
-        .search-box { max-width: 500px; margin: 25px auto 0; }
-        .search-box input {
-            width: 100%; padding: 14px 20px;
-            border: 1px solid #334155; border-radius: 12px;
-            background: #1e293b; color: #e2e8f0; font-size: 1rem; outline: none;
+
+        .subtitle {
+            color: #8b9bb4;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
         }
-        .search-box input:focus { border-color: #38bdf8; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-        .category-title { font-size: 1.3rem; color: #38bdf8; margin: 30px 0 15px; padding-bottom: 8px; border-bottom: 1px solid #1e293b; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+
+        /* 搜索框 */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 50px;
+            border: 1px solid var(--primary);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
+            border-color: #fff;
+        }
+
+        /* 主体容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 分类标题 */
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin: 50px 0 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            filter: drop-shadow(0 0 5px var(--secondary));
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        /* 卡片样式 (毛玻璃) */
         .card {
-            background: #1e293b; border: 1px solid #334155; border-radius: 12px;
-            padding: 20px; text-decoration: none; color: inherit;
-            transition: all 0.2s; display: block;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
-        .card:hover { border-color: #38bdf8; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(56,189,248,0.1); }
-        .card .icon { font-size: 2rem; margin-bottom: 10px; }
-        .card h3 { font-size: 1.05rem; margin-bottom: 6px; color: #f1f5f9; }
-        .card p { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
-        .card .badge { display: inline-block; background: #7c3aed; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; margin-top: 8px; }
-        .submit-btn { text-align: center; padding: 50px 20px; margin-top: 40px; border-top: 1px solid #1e293b; }
-        .submit-btn a { display: inline-block; padding: 12px 32px; background: linear-gradient(135deg, #38bdf8, #a78bfa); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(0, 243, 255, 0.2);
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .tool-icon {
+            font-size: 2rem;
+            background: rgba(255,255,255,0.1);
+            width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(188, 19, 254, 0.2);
+            color: #d98aff;
+            border: 1px solid rgba(188, 19, 254, 0.3);
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        /* 底部 */
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
+        }
     </style>
 </head>
 <body>
+
+    <!-- 粒子特效容器 -->
+    <div id="particles-js"></div>
+
     <header>
-        <h1>🚀 NavHub</h1>
-        <p>精选AI工具，提升10倍效率</p>
-        <div class="search-box">
-            <input type="text" placeholder="搜索AI工具..." id="searchInput" onkeyup="filterCards()">
+        <h1>AI NAV HUB</h1>
+        <p class="subtitle">探索全球顶尖人工智能工具 · 提升未来竞争力</p>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="搜索工具名称或功能..." id="searchInput" onkeyup="filterCards()">
         </div>
     </header>
+
     <div class="container">
 
-        <h2 class="category-title">📊 AI 办公提效</h2>
-        <div class="grid">
-            <a href="https://wondercv.cgref.cn/s/1oe70mmn23" target="_blank" class="card">
-                <div class="icon">📄</div>
-                <h3>WonderCV 简历</h3>
-                <p>AI一键生成专业简历，求职必备神器</p>
-                <span class="badge">免费试用</span>
-            </a>
-            <a href="https://islide.cgref.cn/s/1zn5r9peqm" target="_blank" class="card">
-                <div class="icon">📐</div>
-                <h3>iSlide PPT</h3>
-                <p>AI一键生成精美PPT，职场效率翻倍</p>
-                <span class="badge">职场必备</span>
-            </a>
-            <a href="https://aippt-plugin.cgref.cn/s/2znrl29nr7" target="_blank" class="card">
-                <div class="icon">🎯</div>
-                <h3>AI PPT 插件</h3>
-                <p>浏览器插件，任何网页一键转PPT</p>
-                <span class="badge">效率神器</span>
-            </a>
-            <a href="https://cappt.cgref.cn/s/dqndyxwn2z" target="_blank" class="card">
-                <div class="icon">✨</div>
-                <h3>Cappt AI</h3>
-                <p>AI智能生成演示文稿，告别排版烦恼</p>
-                <span class="badge">AI生成</span>
-            </a>
+        <!-- 分类 1：AI 绘画与设计 -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🎨</span>
+                <span class="category-title">AI 绘画 & 设计</span>
+            </div>
+            <div class="grid">
+                <!-- 你的链接 -->
+                <a href="https://modao.cgref.cn/s/rpe3rode05" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🖌️</div>
+                        <span class="tag">国内热榜</span>
+                    </div>
+                    <h3>墨刀 AI</h3>
+                    <p>国产原型设计神器，AI辅助快速生成UI界面与交互。</p>
+                </a>
+                
+                <!-- 补充国际工具 -->
+                <a href="https://www.midjourney.com" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🌌</div>
+                        <span class="tag">行业标杆</span>
+                    </div>
+                    <h3>Midjourney</h3>
+                    <p>全球最强AI绘画工具，通过Discord生成电影级艺术画作。</p>
+                </a>
+                 <a href="https://stability.ai" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🏞️</div>
+                        <span class="tag">开源免费</span>
+                    </div>
+                    <h3>Stable Diffusion</h3>
+                    <p>本地部署首选，可控性极强的开源AI绘画模型。</p>
+                </a>
+                 <a href="https://www.canva.com/ai-image-generator/" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🎨</div>
+                        <span class="tag">设计必备</span>
+                    </div>
+                    <h3>Canva AI</h3>
+                    <p>在线设计平台集成AI功能，一键抠图、魔法编辑。</p>
+                </a>
+            </div>
         </div>
 
-        <h2 class="category-title">🎬 AI 创作</h2>
-        <div class="grid">
-            <a href="https://xfzhizuo.cgref.cn/s/jgemm3gemy" target="_blank" class="card">
-                <div class="icon">🎙️</div>
-                <h3>讯飞智作</h3>
-                <p>AI配音+视频制作，自媒体创作者首选</p>
-                <span class="badge">创作者推荐</span>
-            </a>
-            <a href="https://modao.cgref.cn/s/rpe3rode05" target="_blank" class="card">
-                <div class="icon">🖥️</div>
-                <h3>墨刀 AI</h3>
-                <p>AI原型设计与协作平台，产品经理必备</p>
-                <span class="badge">产品利器</span>
-            </a>
+        <!-- 分类 2：AI 办公 & 提效 -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">💼</span>
+                <span class="category-title">AI 办公 & 提效</span>
+            </div>
+            <div class="grid">
+                <!-- 你的链接 -->
+                <a href="https://wondercv.cgref.cn/s/1oe70mmn23" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">📄</div>
+                        <span class="tag">求职必备</span>
+                    </div>
+                    <h3>WonderCV 简历</h3>
+                    <p>AI一键优化简历排版与内容，提升面试通过率。</p>
+                </a>
+                <a href="https://islide.cgref.cn/s/1zn5r9peqm" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">📊</div>
+                        <span class="tag">PPT神器</span>
+                    </div>
+                    <h3>iSlide PPT</h3>
+                    <p>海量PPT模板库，AI一键生成大纲与排版。</p>
+                </a>
+                <a href="https://aippt-plugin.cgref.cn/s/2znrl29nr7" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">⚡</div>
+                        <span class="tag">极速生成</span>
+                    </div>
+                    <h3>AI PPT 插件</h3>
+                    <p>浏览器插件，任何网页内容一键转化为演示文稿。</p>
+                </a>
+                <a href="https://cappt.cgref.cn/s/dqndyxwn2z" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">✨</div>
+                        <span class="tag">智能排版</span>
+                    </div>
+                    <h3>Cappt AI</h3>
+                    <p>专注于演示文档生成的AI工具，告别繁琐排版。</p>
+                </a>
+                <!-- 补充国际工具 -->
+                <a href="https://www.notion.so/product/ai" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">📝</div>
+                        <span class="tag">笔记首选</span>
+                    </div>
+                    <h3>Notion AI</h3>
+                    <p>最强的All-in-one工作台，AI辅助写作与整理。</p>
+                </a>
+            </div>
         </div>
 
-        <h2 class="category-title">🤖 AI 智能体</h2>
-        <div class="grid">
-            <a href="https://01agent.cgref.cn/s/5ln1l9gkrw" target="_blank" class="card">
-                <div class="icon">🧠</div>
-                <h3>01 Agent</h3>
-                <p>零代码搭建AI智能体，人人都能拥有AI助手</p>
-                <span class="badge">零门槛</span>
-            </a>
-            <a href="https://vibeknow.cgref.cn/s/zdkj0m8e1r" target="_blank" class="card">
-                <div class="icon">📚</div>
-                <h3>VibeKnow</h3>
-                <p>AI知识库搭建，让团队知识秒变智能问答</p>
-                <span class="badge">企业级</span>
-            </a>
+        <!-- 分类 3：AI 视频 & 创作 -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🎬</span>
+                <span class="category-title">AI 视频 & 创作</span>
+            </div>
+            <div class="grid">
+                <!-- 你的链接 -->
+                <a href="https://xfzhizuo.cgref.cn/s/jgemm3gemy" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🎙️</div>
+                        <span class="tag">配音合成</span>
+                    </div>
+                    <h3>讯飞智作</h3>
+                    <p>科大讯飞出品，文字转语音、虚拟人视频制作。</p>
+                </a>
+                <!-- 补充国际工具 -->
+                <a href="https://runwayml.com/" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🎥</div>
+                        <span class="tag">视频生成</span>
+                    </div>
+                    <h3>Runway Gen-2</h3>
+                    <p>好莱坞级别的AI视频生成工具，图生视频效果惊艳。</p>
+                </a>
+                <a href="https://www.capcut.cn/" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">✂️</div>
+                        <span class="tag">剪辑神器</span>
+                    </div>
+                    <h3>剪映专业版</h3>
+                    <p>内置强大AI功能，自动字幕、智能抠像。</p>
+                </a>
+            </div>
         </div>
 
-        <div class="submit-btn">
-            <p style="color:#64748b; margin-bottom:15px;">有好用的AI工具？推荐给大家</p>
-            <a href="mailto:admin@navhub.cc?subject=NavHub工具收录申请">📬 提交工具收录</a>
-        </div>
-    </div>
-    <script>
-        function filterCards() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(card => {
-                const text = card.innerText.toLowerCase();
-                card.style.display = text.includes(keyword) ? 'block' : 'none';
-            });
-        }
-    </script>
-</body>
-</html>
+        <!-- 分类 4：AI 智能体 & 对话 -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🤖</span>
+                <span class="category-title">AI 智能体 & 对话</span>
+            </div>
+            <div class="grid">
+                <!-- 你的链接 -->
+                <a href="https://01agent.cgref.cn/s/5ln1l9gkrw" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">🧠</div>
+                        <span class="tag">零代码</span>
+                    </div>
+                    <h3>01 Agent</h3>
+                    <p>零代码搭建专属AI智能体，打造个人知识库。</p>
+                </a>
+                <a href="https://vibeknow.cgref.cn/s/zdkj0m8e1r" target="_blank" class="card">
+                    <div class="card-top">
+                        <div class="tool-icon">📚</div>
+                        <span class="tag">企业级</span>
+                    </div>
+                    <h3>VibeKnow</h3>
+                    <p>团队知识秒变智能问答，企业内部效率引擎。</p>
+                </a>
+                <!-- 补充国际工具 -->
+                <a href="https://claude.ai/" target="_blank" class="card">
+                    <div
