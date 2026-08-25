@@ -1,0 +1,38 @@
+name: Auto Update AI Tools
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch tools
+        run: node scripts/fetch-tools.js
+
+      - name: Commit if changed
+        run: |
+          if [ -f .no-update ]; then
+            rm -f .no-update
+            exit 0
+          fi
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "🔄 自动更新AI工具 $(date +'%Y-%m-%d')"
+          git push
